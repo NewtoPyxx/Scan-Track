@@ -109,22 +109,25 @@ function loadExcelB(input) {
 //--- 掃碼
 function startScan(mode) {
     scanMode = mode;
+    // 清理之前的 scanner
     if (scanner) {
-        scanner.clear();
-        document.getElementById("reader").innerHTML = "";
+        scanner.clear().catch(()=>{});
+        scanner = null;
     }
+    document.getElementById("reader").innerHTML = ""; // 強制重置 DOM
     scanner = new Html5Qrcode("reader");
     scanner.start(
         { facingMode: "environment" }, // 後鏡頭
         { fps:10, qrbox: {width:220,height:220}},
         function(decodedText, decodedResult) {
-            scanner.stop();
+            scanner.stop().then(()=>{scanner = null;});
             document.getElementById("reader").innerHTML = "";
             onScan(decodedText);
         },
         function(errorMessage) {}
     );
 }
+
 function onScan(gtinRaw) {
     let gtin = trimGTIN(gtinRaw.trim());
     if (scanMode === "shelf") {
